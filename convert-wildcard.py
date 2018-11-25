@@ -51,7 +51,7 @@ def main():
     if os.path.isfile(args.input):
         print ("--- Using input file '{}'".format(args.input))
     else:
-        print ("!!! Could not input open file '{}'".format(args.input))
+        print ("!!! Could not open input file '{}'".format(args.input))
         sys.exit(1)
 
     print ("--- Connecting to server at {}".format(apivars.managmentURL))
