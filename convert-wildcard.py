@@ -2,6 +2,7 @@
 import sys
 import requests
 import json
+import os.path
 import csv
 import urllib3
 import argparse
@@ -9,7 +10,7 @@ import getpass
 from time import sleep
 from urlparse import urljoin
 
-__version__ = "1.0"
+__version__ = "1.1"
 
 class APIException(Exception):
     """Exception raised when API response is abnormal."""
@@ -37,17 +38,27 @@ def main():
     print ("*** ")
     print ("*** " + parser.description)
     print ("*** ")
-    parser.add_argument("-s", "--server", required=True, action="store", help="Server URL used to access the management server")
-    parser.add_argument("-u", "--user", action="store", help="Username used to access the API")
-    parser.add_argument("-p", "--password", action="store", help="Password (for Usernamed) to access the API")
+    parser._action_groups.pop()
+    required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguments')
+    required.add_argument("-i", "--input", required=True, action="store", help="Input file with records to convert")
+    required.add_argument("-s", "--server", required=True, action="store", help="Server URL for management server")
+    optional.add_argument("-u", "--user", action="store", help="Username to access the API")
+    optional.add_argument("-p", "--password", action="store", help="Password to access the API")
     args = parser.parse_args()
     
     apivars.managmentURL = args.server
-    print ("Connecting to server at {}".format(apivars.managmentURL))
+    if os.path.isfile(args.input):
+        print ("--- Using input file '{}'".format(args.input))
+    else:
+        print ("!!! Could not input open file '{}'".format(args.input))
+        sys.exit(1)
+
+    print ("--- Connecting to server at {}".format(apivars.managmentURL))
     if not args.user:
         args.user = raw_input('Username: ').strip('\r')
     else:
-        print ("Attempting to login as '{}'".format(args.user))
+        print ("--- Attempting to login as '{}'".format(args.user))
 
     if not args.password:
         args.password = getpass.getpass(stream=sys.stderr).strip('\r')
@@ -65,11 +76,11 @@ def main():
                 raise (APIException(409,"Server API needs to be version 1.3 or greater '{}' returned from login.".format(apiversion)))
             print ("--- Login to management via API {} complete. (session-uid: {})".format(apiversion,apivars.sessionUID))
     except APIException as apie:
-        print ("--- Login failed! {}".format(apie))
+        print ("!!! Login failed with message ({})".format(apie))
         sys.exit(1)
 
     #Parse CSV for records
-    records = getRecords()
+    records = getRecords(args.input)
 
     #Loop through each record.  Rename existing objects and replace references with new object
     if len(records) > 0:
@@ -142,10 +153,10 @@ def replaceWhereUsed(OldID,NewID):
             mgmtreq('set-access-rule', params)
             print ("      > Updated {} sources and {} destinations in rule".format(sources,destinations))
             
-def getRecords():
+def getRecords(filename):
     """Read all records to be imported from CSV file."""
     retval = []
-    with open('data/output.csv', 'rb') as f:
+    with open(filename, 'rb') as f:
         reader = csv.DictReader(f)
         for line in reader:
             retval.append(line)
