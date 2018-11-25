@@ -11,9 +11,6 @@ from urlparse import urljoin
 
 __version__ = "1.0"
 
-r77suffix = "_R77"
-wcsuffix = "_WC"
-
 class APIException(Exception):
     """Exception raised when API response is abnormal."""
 
@@ -77,12 +74,15 @@ def main():
     #Loop through each record.  Rename existing objects and replace references with new object
     if len(records) > 0:
         print ('--- Parse CSV complete. ({} records found for processing)'.format(len(records)))
+        suffix = {}
+        suffix["R77"] = "_R77"
+        suffix["R80"] = "_WC"
         for record in records:
             print ('--- Working with record {} (color:{} network:{} mask:{})'.format(record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
             #get uid for network object
             NUID = getNetworkUID(record['name'])
-            r77name = record['name'] + r77suffix
-            wcname = record['name'] + wcsuffix
+            r77name = record['name'] + suffix["R77"]
+            r80name = record['name'] + suffix["R80"]
             if NUID:
                 try:
                     print ('    > Found original network object "{}" (uid: {})'.format(record['name'],NUID))
@@ -96,19 +96,19 @@ def main():
                 if NUID:
                     print ('    > Found R77 network object "{}" (uid: {})'.format(r77name,NUID))
                     #get uid for wildcard object
-                    WUID = getWildcardUID(wcname)
+                    WUID = getWildcardUID(r80name)
                     if WUID:
-                        print ('    > Found wildcard object "{}" (uid: {})'.format(wcname,WUID))
+                        print ('    > Found wildcard object "{}" (uid: {})'.format(r80name,WUID))
                     else:
                         params = {}
-                        params["name"] = wcname
+                        params["name"] = r80name
                         params["ipv4-address"] = record["ipv4-address"]
                         params["ipv4-mask-wildcard"] = record["ipv4-mask-wildcard"]
                         params["color"] = record["color"]
                         response = mgmtreq('add-wildcard', params)
                         if response["uid"]:
                             WUID = response["uid"]
-                            print ('    > Created new wildcard object "{}" (uid: {})'.format(wcname,WUID))
+                            print ('    > Created new wildcard object "{}" (uid: {})'.format(r80name,WUID))
                     replaceWhereUsed(NUID,WUID)
     changes = mgmtchanges()
     if changes > 0:
