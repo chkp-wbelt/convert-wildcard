@@ -48,12 +48,12 @@ def main():
     apivars.managmentURL = args.server
     print ("Connecting to server at {}".format(apivars.managmentURL))
     if not args.user:
-        args.user = raw_input('Username: ')
+        args.user = raw_input('Username: ').strip('\r')
     else:
         print ("Attempting to login as '{}'".format(args.user))
 
     if not args.password:
-        args.password = getpass.getpass(stream=sys.stderr)
+        args.password = getpass.getpass(stream=sys.stderr).strip('\r')
     urllib3.disable_warnings()
     #Login to management server
     try:
@@ -238,7 +238,7 @@ def mgmtreq(command, payload):
     data = {}
     if command:
         isLogin = False
-        apiRequest = urljoin(managementBase, command)
+        apiRequest = urljoin(managementBase,command)
         headers = apivars.sessionHeaders
         if command.lower() == 'login':
             isLogin = True
