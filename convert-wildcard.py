@@ -34,7 +34,7 @@ class APIVariables():
 apivars = APIVariables()
 def main():
     """Main entry point for the script."""
-    parser = argparse.ArgumentParser(description="Widlcard import/rule conversion script v" + __version__)
+    parser = argparse.ArgumentParser(description="Wildcard import/rule conversion script v" + __version__)
     print ("*** ")
     print ("*** " + parser.description)
     print ("*** ")
@@ -45,6 +45,7 @@ def main():
     required.add_argument("-s", "--server", required=True, action="store", help="Server URL for management server")
     optional.add_argument("-u", "--user", action="store", help="Username to access the API")
     optional.add_argument("-p", "--password", action="store", help="Password to access the API")
+    optional.add_argument("-d", "--domain", action="store", help="Domain (when using multidomain)")
     args = parser.parse_args()
     
     apivars.managmentURL = args.server
@@ -68,6 +69,10 @@ def main():
         params = {}
         params["user"] = args.user
         params["password"] = args.password
+        if args.domain:
+            print ("--- Using domain '{}'".format(args.domain))
+            params["domain"] = args.domain
+
         response = mgmtreq('login', params)
 
         if response["api-server-version"]:
@@ -273,7 +278,7 @@ def mgmtreq(command, payload):
                 raise APIException(407,"Authentication for '{}' failed".format(apiRequest))
             else:
                 message = "Unknown error"
-                if response and response.text:
+                if response.text:
                     data = json.loads(response.text)
                     if data["code"]:
                         message = data["code"]
