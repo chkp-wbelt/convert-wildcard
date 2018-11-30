@@ -18,15 +18,19 @@ positional arguments:
 1. copy file wildcard-object.py to /home/admin/ on R77.30 management server
 2. ssh into R77.30 management server
 3. enter expert mode
-4. chmod the script to be executable
+4. run dos2unix command to ensure script is formatted properly
+```
+dos2unix /home/admin/wildcard-object.py
+```
+5. chmod the script to be executable
 ```
 chmod u+x /home/admin/wildcard-object.py
 ```
-5. edit the whitelist exceptions list on Gaia
+6. edit the whitelist exceptions list on Gaia
 ```
 vi /etc/fw/conf/whitelist
 ```
-6. Add the following line to the whitelist
+7. Add the following line to the whitelist
 ```
 p;/home/admin/wildcard-object.py
 ```
@@ -39,7 +43,7 @@ p;/home/admin/wildcard-object.py
 ```
 2. convert wildcard objects from objects_5_0.C file to have a netmask of 255.255.255.0 so migrate export/import will work properly
 ```
-/home/admin/wildcard-object.py convert /var/opt/CPsuite-R77/fw1/conf/objects_5_0.C /home/admin/objects_5_0.C
+/home/admin/wildcard-object.py update /var/opt/CPsuite-R77/fw1/conf/objects_5_0.C /home/admin/objects_5_0.C
 ```
 3. chmod new objects_5_0.C file to have same permissions as original objects_5_0.C file
 ```
