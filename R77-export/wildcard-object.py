@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import re, os, argparse
 
-__version__ = "1.0"
+__version__ = "1.2"
 parser = argparse.ArgumentParser(description="Wildcard object script v" + __version__)
 print ("*** ")
 print ("*** " + parser.description)

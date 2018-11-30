@@ -10,7 +10,7 @@ import getpass
 from time import sleep
 from urlparse import urljoin
 
-__version__ = "1.1"
+__version__ = "1.2"
 
 class APIException(Exception):
     """Exception raised when API response is abnormal."""
