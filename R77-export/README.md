@@ -15,22 +15,21 @@ positional arguments:
 ## Instructions
 
 ### Script setup
-1. copy file wildcard-object.py to /home/admin/ on R77.30 management server
-2. ssh into R77.30 management server
-3. enter expert mode
-4. run dos2unix command to ensure script is formatted properly
+1. ssh into R77.30 management server
+2. enter expert mode
+3. copy file [wildcard-object.py](https://raw.githubusercontent.com/chkp-wbelt/convert-wildcard/master/R77-export/wildcard-object.py) to /home/admin/ on R77.30 management server
 ```
-dos2unix /home/admin/wildcard-object.py
+curl_cli -k https://raw.githubusercontent.com/chkp-wbelt/convert-wildcard/master/R77-export/wildcard-object.py > /home/admin/wildcard-object.py
 ```
-5. chmod the script to be executable
+4. chmod the script to be executable
 ```
 chmod u+x /home/admin/wildcard-object.py
 ```
-6. edit the whitelist exceptions list on Gaia
+5. edit the whitelist exceptions list on Gaia
 ```
 vi /etc/fw/conf/whitelist
 ```
-7. Add the following line to the whitelist
+6. Add the following line to the whitelist
 ```
 p;/home/admin/wildcard-object.py
 ```
