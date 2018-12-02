@@ -89,7 +89,7 @@ def main():
 
     #Loop through each record.  Rename existing objects and replace references with new object
     if len(records) > 0:
-        print ('--- Parse CSV complete. ({} records found for processing)'.format(len(records)))
+        print ('--- Parse CSV complete. ({:,} records found for processing)'.format(len(records)))
         suffix = {}
         suffix["R77"] = "_R77"
         suffix["R80"] = "_WC"
@@ -128,7 +128,7 @@ def main():
                     replaceWhereUsed(NUID,WUID)
     changes = mgmtchanges()
     if changes > 0:
-        print ("--- Found {} changes pending.".format(changes))
+        print ("--- Found {:,} changes pending.".format(changes))
         mgmtpublish()
     mgmtlogout()
 
@@ -140,8 +140,8 @@ def replaceWhereUsed(OldID,NewID):
         params["uid"] = rule["rule"]["uid"]
         params["layer"] = rule["layer"]["uid"]
         params["details-level"] = "uid"
-        print ("    > Updating Rule:{} Layer:{}".format(params["uid"],params["layer"]))
         ruledata = mgmtreq('show-access-rule', params)
+        print ('    > Checking rule "{}" source and destination columns'.format(ruledata["name"]))
         sources = 0
         destinations = 0
         params["source"] = ruledata["source"]
@@ -155,8 +155,14 @@ def replaceWhereUsed(OldID,NewID):
                 params["destination"][i] = NewID
                 destinations += 1
         if sources > 0 or destinations > 0:
+            if sources > 0 and destinations > 0:
+                description = "source and destination columns"
+            elif source > 0:
+                description = "source column"
+            else:
+                description = "destination column"
             mgmtreq('set-access-rule', params)
-            print ("      > Updated {} sources and {} destinations in rule".format(sources,destinations))
+            print ('      > Updated {} for rule "{}"'.format(description,ruledata["name"]))
             
 def getRecords(filename):
     """Read all records to be imported from CSV file."""
@@ -233,7 +239,7 @@ def mgmtdiscard():
     try:
         data = mgmtreq('discard', {})
         if data["number-of-discarded-changes"]:
-            print ("--- Discard complete. ({} changes discarded)".format(data["number-of-discarded-changes"]))
+            print ("--- Discard complete. ({:,} changes discarded)".format(data["number-of-discarded-changes"]))
     except APIException as apie:
         print ("--- Discard failed! {}".format(apie))
 
