@@ -141,7 +141,11 @@ def replaceWhereUsed(OldID,NewID):
         params["layer"] = rule["layer"]["uid"]
         params["details-level"] = "uid"
         ruledata = mgmtreq('show-access-rule', params)
-        print ('    > Checking rule "{}" source and destination columns'.format(ruledata["name"]))
+        ruledesc = "(uid: {})".format(params["uid"])
+        if "name" in ruledata:
+            if ruledata["name"] != "":
+                ruledesc = '"{}"'.format(ruledata["name"])
+        print ('    > Checking rule {}'.format(ruledesc))
         sources = 0
         destinations = 0
         params["source"] = ruledata["source"]
@@ -162,7 +166,7 @@ def replaceWhereUsed(OldID,NewID):
             else:
                 description = "destination column"
             mgmtreq('set-access-rule', params)
-            print ('      > Updated {} for rule "{}"'.format(description,ruledata["name"]))
+            print ('      > Updated {}'.format(description))
             
 def getRecords(filename):
     """Read all records to be imported from CSV file."""
