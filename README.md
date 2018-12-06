@@ -6,8 +6,8 @@ Check Point management API script to migrate R77.30 wildcard objects to R80.20 c
 
 * R77-export/wildcard-object python script is used to create a [Wildcard object CSV](#wildcard-object-csv) file from a R77 management server objects_5_0.C
   * This script is run on your R77.30 MDS 
-  * Extract all current wildcard object information from objects.C
-  * Prepare objects.C for migrate export to R80 (update netmask for each wildcard object to a valid netmask)
+  * Extract all current wildcard object information from objects_5_0.C
+  * Prepare objects_5_0.C for migrate export to R80 (update netmask for each wildcard object to a valid netmask)
 
 * convert-wildcard python script is used to load data from a [Wildcard object CSV](#wildcard-object-csv) file into an [R80.20 management server](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk122485)
   * This script can be run from any machine with Python and API access to the R80.20 MDS
