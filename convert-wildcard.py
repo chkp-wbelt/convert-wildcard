@@ -161,7 +161,7 @@ def replaceWhereUsed(OldID,NewID):
         if sources > 0 or destinations > 0:
             if sources > 0 and destinations > 0:
                 description = "source and destination columns"
-            elif source > 0:
+            elif sources > 0:
                 description = "source column"
             else:
                 description = "destination column"
