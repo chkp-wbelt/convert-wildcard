@@ -142,7 +142,42 @@ def main():
         mgmtpublish()
 
     #After new objects are published, remove all R77 objects and remove the suffix on the new wildcard objects.
-    #if args.cleanup:
+    if args.cleanup:
+        for records in records:
+            #Append R77 to end to make sure it matches the new object name
+            r77name = record['name'] + suffix["R77"]
+            r80name = record['name'] + suffix["R80"]
+            NUID = getNetworkUID(r77name)
+            WUID = getWildcardUID(r80name)
+            if NUID:
+                try:
+                    print ('    > Found R77.30 Wildcard Object "{}" (uid: {})' .format(r77name ,NUID))
+                    mgmtreq('delete-network', {'uid': '{}' .format(NUID)})
+                    print ('    > Successfully deleted network object "{}" with UID "{}"' .format(r77name, NUID))
+                     #Clear out NUID
+                    NUID = ""
+                except APIException as apie:
+                    print ('    > Failed to delete object "{}" with UID "{}"' .format(r77name, NUID))
+            
+           
+
+            if WUID:
+                try:
+                    print ('    > Found R80 wildcard Obect "{}" (uid: {})' .format(r80name,WUID))
+                    mgmtreq('set-wildcard', {'uid': '{}'.format(WUID),'new-name': '{}'.format(record['name'])})
+                    print ('    > Renamed wildcard object "{}" to "{}"'.format(r80name,record['name']))
+                    #Clear out WUID
+                    WUID = ""
+                    
+                except APIException as apie:
+                    print ('    > Failed to rename object "{}" with UID "{}"'.format(r80name, WUID))
+                
+                #Publish changes from session to remove R77 objects 
+                changes = mgmtchanges()
+                if changes > 0:
+                    print ("--- Found {:,} changes pending.".format(changes))
+                    mgmtpublish()           
+
     mgmtlogout()
 
 def replaceWhereUsed(OldID,NewID):
