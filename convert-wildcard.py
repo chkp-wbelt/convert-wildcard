@@ -99,8 +99,10 @@ def main():
         for record in records:
             track += 1
             print ('--- Working with record {} (color:{} network:{} mask:{})'.format(record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
-            print ('This is object %s of %s objects' %(track, len(records)))
             
+            #Prints out progress indicator
+            print ('This is object %s of %s objects' %(track, len(records)))
+
             #get uid for network object
             NUID = getNetworkUID(record['name'])
             r77name = record['name'] + suffix["R77"]
