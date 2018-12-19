@@ -98,7 +98,6 @@ def main():
         for record in records:
             track += 1
             print ('--- Record {:,} of {:,}.  Working with {} (color:{} network:{} mask:{})'.format(track,len(records),record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
-            
             #get uid for network object
             NUID = getNetworkUID(record['name'])
             r77name = record['name'] + suffix["R77"]
@@ -129,7 +128,7 @@ def main():
                         if response["uid"]:
                             WUID = response["uid"]
                             print ('    > Created new wildcard object "{}" (uid: {})'.format(r80name,WUID))
-                    replaceWhereUsed(NUID,WUID)        
+                    replaceWhereUsed(NUID,WUID)
     changes = mgmtchanges()
     if changes > 0:
         print ("--- Found {:,} changes pending.".format(changes))
@@ -298,7 +297,6 @@ def mgmtreq(command, payload):
                         message = data["code"]
                 raise APIException(response.status_code,message)
     return data
-
 
 if __name__ == '__main__':
     main()
