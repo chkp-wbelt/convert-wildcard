@@ -89,22 +89,18 @@ def main():
     #Parse CSV for records
     records = getRecords(args.input)
 
-    #Create variable to track number of objects
-    track = 0
-
     #Loop through each record.  Rename existing objects and replace references with new object
     if len(records) > 0:
         print ('--- Parse CSV complete. ({:,} records found for processing)'.format(len(records)))
+        #Create variable to track number of objects
+        track = 0
         suffix = {}
         suffix["R77"] = "_R77"
         suffix["R80"] = "_WC"
         for record in records:
             track += 1
-            print ('--- Working with record {} (color:{} network:{} mask:{})'.format(record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
+            print ('--- Record {:,} of {:,}.  Working with {} (color:{} network:{} mask:{})'.format(track,len(records),record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
             
-            #Prints out progress indicator
-            print ('This is object {} of {} objects' .format(track, len(records)))
-
             #get uid for network object
             NUID = getNetworkUID(record['name'])
             r77name = record['name'] + suffix["R77"]
