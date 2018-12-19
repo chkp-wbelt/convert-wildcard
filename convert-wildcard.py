@@ -46,8 +46,6 @@ def main():
     optional.add_argument("-u", "--user", action="store", help="Username to access the API")
     optional.add_argument("-p", "--password", action="store", help="Password to access the API")
     optional.add_argument("-d", "--domain", action="store", help="Domain (when using multidomain)")
-    #Add optional argument to cleanup old R77 objects and remove the R80 suffix on newly created objects
-    optional.add_argument("-c", "--cleanup", action="store", help="Setting this flag removes references to the old wildcard objects")
     args = parser.parse_args()
     
     apivars.managmentURL = args.server
@@ -103,7 +101,7 @@ def main():
             print ('--- Working with record {} (color:{} network:{} mask:{})'.format(record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
             
             #Prints out progress indicator
-            print ('This is object {} of {} objects' .format(track, len(records)))
+            print ('This is object %s of %s objects' %(track, len(records)))
 
             #get uid for network object
             NUID = getNetworkUID(record['name'])
@@ -135,14 +133,11 @@ def main():
                         if response["uid"]:
                             WUID = response["uid"]
                             print ('    > Created new wildcard object "{}" (uid: {})'.format(r80name,WUID))
-                    replaceWhereUsed(NUID,WUID)        
+                    replaceWhereUsed(NUID,WUID)
     changes = mgmtchanges()
     if changes > 0:
         print ("--- Found {:,} changes pending.".format(changes))
         mgmtpublish()
-
-    #After new objects are published, remove all R77 objects and remove the suffix on the new wildcard objects.
-    #if args.cleanup:
     mgmtlogout()
 
 def replaceWhereUsed(OldID,NewID):
@@ -307,7 +302,6 @@ def mgmtreq(command, payload):
                         message = data["code"]
                 raise APIException(response.status_code,message)
     return data
-
 
 if __name__ == '__main__':
     main()
