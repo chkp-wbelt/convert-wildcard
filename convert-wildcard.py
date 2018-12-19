@@ -10,7 +10,7 @@ import getpass
 from time import sleep
 from urlparse import urljoin
 
-__version__ = "1.2"
+__version__ = "1.3"
 
 class APIException(Exception):
     """Exception raised when API response is abnormal."""
@@ -90,11 +90,14 @@ def main():
     #Loop through each record.  Rename existing objects and replace references with new object
     if len(records) > 0:
         print ('--- Parse CSV complete. ({:,} records found for processing)'.format(len(records)))
+        #Create variable to track number of objects
+        track = 0
         suffix = {}
         suffix["R77"] = "_R77"
         suffix["R80"] = "_WC"
         for record in records:
-            print ('--- Working with record {} (color:{} network:{} mask:{})'.format(record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
+            track += 1
+            print ('--- Record {:,} of {:,}.  Working with {} (color:{} network:{} mask:{})'.format(track,len(records),record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard']))
             #get uid for network object
             NUID = getNetworkUID(record['name'])
             r77name = record['name'] + suffix["R77"]
