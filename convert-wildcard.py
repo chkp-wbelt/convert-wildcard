@@ -10,6 +10,10 @@ class WildcardManager():
     def __init__(self, client):
         self.client = client
 
+    def cleanup(self, records):
+        #TODO: logic for conversion
+        pass
+
     def convert(self, records):
         #Loop through each record.  Rename existing objects and replace references with new object
         if len(records) > 0:
@@ -124,6 +128,7 @@ def main():
     optional.add_argument("-u", "--user", action="store", help="Username to access the API")
     optional.add_argument("-p", "--password", action="store", help="Password to access the API")
     optional.add_argument("-d", "--domain", action="store", help="Domain (when using multidomain)")
+    #TODO: add argument for cleanup
     args = parser.parse_args()
     
     if os.path.isfile(args.input):
@@ -171,7 +176,9 @@ def main():
 
     wcm = WildcardManager(client)
     print "--- Starting Convert..."
+    #TODO: Logic for convert vs. cleanup?
     wcm.convert(records)
+    #TODO: wcm.cleanup(records)
     print "--- Starting Publish..."
     response = wcm.publish()
     if response.success:
