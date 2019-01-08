@@ -1,11 +1,14 @@
 """Script to migrate R77.30 network objects to R80.20 native wildcard objects."""
-import sys
-import os.path
-import csv
 import argparse
+import csv
 import getpass
+import os.path
+import sys
+
 from cp_mgmt_api_python_sdk.lib import APIClient, APIClientArgs
+
 __version__ = "2.0"
+
 class WildcardManager():
     def __init__(self, client):
         self.client = client
