@@ -9,23 +9,23 @@ __version__ = "2.0"
 class WildcardManager():
     def __init__(self, client):
         self.client = client
+        self._suffix = {}
+        self._suffix["R77"] = "_R77"
+        self._suffix["R80"] = "_WC"
 
-    def convert(self, records):
+    def convert_rulebase(self, records):
         #Loop through each record.  Rename existing objects and replace references with new object
         if len(records) > 0:
             print '--- Convert found {:,} records for processing'.format(len(records))
             #Create variable to track number of objects
             track = 0
-            suffix = {}
-            suffix["R77"] = "_R77"
-            suffix["R80"] = "_WC"
             for record in records:
                 track += 1
                 print '--- Record {:,} of {:,}.  Working with {} (color:{} network:{} mask:{})'.format(track,len(records),record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard'])
                 #get uid for network object
-                NUID = self.getNetworkUID(record['name'])
-                r77name = record['name'] + suffix["R77"]
-                r80name = record['name'] + suffix["R80"]
+                NUID = self.get_network_uid(record['name'])
+                r77name = record['name'] + self._suffix["R77"]
+                r80name = record['name'] + self._suffix["R80"]
                 if NUID:
                     print '    > Found original network object "{}" (uid: {})'.format(record['name'],NUID)
                     params = {}
@@ -38,11 +38,11 @@ class WildcardManager():
                         print '      > Failed to renamed network object to "{}" (Message: {})'.format(r77name,response.error_message)
                     NUID = ""
                 if NUID == "":
-                    NUID = self.getNetworkUID(r77name)
+                    NUID = self.get_network_uid(r77name)
                     if NUID:
                         print '    > Found R77 network object "{}" (uid: {})'.format(r77name,NUID)
                         #get uid for wildcard object
-                        WUID = self.getWildcardUID(r80name)
+                        WUID = self.get_wildcard_uid(r80name)
                         if WUID:
                             print '    > Found wildcard object "{}" (uid: {})'.format(r80name,WUID)
                         else:
@@ -97,18 +97,18 @@ class WildcardManager():
         response = self.client.api_call('logout', {})
         return response
 
-    def getGenericUID(self, objectType, name):
+    def _get_generic_uid(self, objectType, name):
         retval = ""
         response = self.client.api_call(objectType, {'name': '{}'.format(name),'details-level': 'uid'})
         if response.success and 'uid' in response.data:
             retval = response.data['uid']
         return retval
 
-    def getNetworkUID(self, name):
-        return self.getGenericUID('show-network',name)
+    def get_network_uid(self, name):
+        return self._get_generic_uid('show-network',name)
 
-    def getWildcardUID(self, name):
-        return self.getGenericUID('show-wildcard',name)
+    def get_wildcard_uid(self, name):
+        return self._get_generic_uid('show-wildcard',name)
 
 def main():
     """Main entry point for the script."""
@@ -171,7 +171,7 @@ def main():
 
     wcm = WildcardManager(client)
     print "--- Starting Convert..."
-    wcm.convert(records)
+    wcm.convert_rulebase(records)
     print "--- Starting Publish..."
     response = wcm.publish()
     if response.success:
