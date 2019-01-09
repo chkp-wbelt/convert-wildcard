@@ -9,62 +9,66 @@ from cp_mgmt_api_python_sdk.lib import APIClient, APIClientArgs
 
 __version__ = "2.0"
 
+
 class WildcardManager():
     def __init__(self, client):
-        self.client = client
+        self._client = client
         self._suffix = {}
         self._suffix["R77"] = "_R77"
         self._suffix["R80"] = "_WC"
 
     def convert_rulebase(self, records):
-        #Loop through each record.  Rename existing objects and replace references with new object
+        # Loop through each record.  Rename existing objects and replace references with new object
         if len(records) > 0:
             print '--- Convert found {:,} records for processing'.format(len(records))
-            #Create variable to track number of objects
+            # Create variable to track number of objects
             track = 0
             for record in records:
                 track += 1
-                print '--- Record {:,} of {:,}.  Working with {} (color:{} network:{} mask:{})'.format(track,len(records),record['name'],record['color'],record['ipv4-address'],record['ipv4-mask-wildcard'])
-                #get uid for network object
+                print '--- Record {:,} of {:,}.  Working with {} (color:{} network:{} mask:{})'.format(
+                    track, len(records), record['name'], record['color'],
+                    record['ipv4-address'], record['ipv4-mask-wildcard'])
+                # get uid for network object
                 NUID = self.get_network_uid(record['name'])
                 r77name = record['name'] + self._suffix["R77"]
                 r80name = record['name'] + self._suffix["R80"]
                 if NUID:
-                    print '    > Found original network object "{}" (uid: {})'.format(record['name'],NUID)
+                    print '    > Found original network object "{}" (uid: {})'.format(record['name'], NUID)
                     params = {}
                     params["uid"] = NUID
                     params["new-name"] = r77name
-                    response = self.client.api_call("set-network", params)
+                    response = self._client.api_call("set-network", params)
                     if response.success:
-                        print '      > Renamed network object to "{}" (uid: {})'.format(r77name,NUID)
+                        print '      > Renamed network object to "{}" (uid: {})'.format(r77name, NUID)
                     else:
-                        print '      > Failed to renamed network object to "{}" (Message: {})'.format(r77name,response.error_message)
+                        print '      > Failed to renamed network object to "{}" (Message: {})'.format(
+                            r77name, response.error_message)
                     NUID = ""
                 if NUID == "":
                     NUID = self.get_network_uid(r77name)
                     if NUID:
-                        print '    > Found R77 network object "{}" (uid: {})'.format(r77name,NUID)
-                        #get uid for wildcard object
+                        print '    > Found R77 network object "{}" (uid: {})'.format(r77name, NUID)
+                        # get uid for wildcard object
                         WUID = self.get_wildcard_uid(r80name)
                         if WUID:
-                            print '    > Found wildcard object "{}" (uid: {})'.format(r80name,WUID)
+                            print '    > Found wildcard object "{}" (uid: {})'.format(r80name, WUID)
                         else:
                             params = {}
                             params["name"] = r80name
                             params["ipv4-address"] = record["ipv4-address"]
                             params["ipv4-mask-wildcard"] = record["ipv4-mask-wildcard"]
                             params["color"] = record["color"]
-                            response = self.client.api_call("add-wildcard", params)
+                            response = self._client.api_call("add-wildcard", params)
                             if "uid" in response.data:
                                 WUID = response.data["uid"]
-                                print '    > Created new wildcard object "{}" (uid: {})'.format(r80name,WUID)
-                        response = self.client.api_call("where-used", {'uid': '{}'.format(NUID)})
+                                print '    > Created new wildcard object "{}" (uid: {})'.format(r80name, WUID)
+                        response = self._client.api_call("where-used", {'uid': '{}'.format(NUID)})
                         for rule in response.data["used-directly"]["access-control-rules"]:
                             params = {}
                             params["uid"] = rule["rule"]["uid"]
                             params["layer"] = rule["layer"]["uid"]
                             params["details-level"] = "uid"
-                            ruledata = self.client.api_call('show-access-rule', params)
+                            ruledata = self._client.api_call('show-access-rule', params)
                             ruledesc = "(uid: {})".format(params["uid"])
                             if "name" in ruledata.data:
                                 if ruledata.data["name"] != "":
@@ -89,29 +93,30 @@ class WildcardManager():
                                     description = "source column"
                                 else:
                                     description = "destination column"
-                                self.client.api_call('set-access-rule', params)
+                                self._client.api_call('set-access-rule', params)
                                 print '      > Updated {}'.format(description)
 
     def publish(self):
-        response = self.client.api_call('publish', {}, wait_for_task=True)
+        response = self._client.api_call('publish', {}, wait_for_task=True)
         return response
 
     def logout(self):
-        response = self.client.api_call('logout', {})
+        response = self._client.api_call('logout', {})
         return response
 
     def _get_generic_uid(self, objectType, name):
         retval = ""
-        response = self.client.api_call(objectType, {'name': '{}'.format(name),'details-level': 'uid'})
+        response = self._client.api_call(objectType, {'name': '{}'.format(name), 'details-level': 'uid'})
         if response.success and 'uid' in response.data:
             retval = response.data['uid']
         return retval
 
     def get_network_uid(self, name):
-        return self._get_generic_uid('show-network',name)
+        return self._get_generic_uid('show-network', name)
 
     def get_wildcard_uid(self, name):
-        return self._get_generic_uid('show-wildcard',name)
+        return self._get_generic_uid('show-wildcard', name)
+
 
 def main():
     """Main entry point for the script."""
@@ -128,14 +133,13 @@ def main():
     optional.add_argument("-p", "--password", action="store", help="Password to access the API")
     optional.add_argument("-d", "--domain", action="store", help="Domain (when using multidomain)")
     args = parser.parse_args()
-    
     if os.path.isfile(args.input):
         records = []
         with open(args.input, 'rb') as f:
             reader = csv.DictReader(f)
             for line in reader:
                 records.append(line)
-        print "--- Read {:,} records from input file '{}'".format(len(records),args.input)
+        print "--- Read {:,} records from input file '{}'".format(len(records), args.input)
     else:
         print "!!! Could not open input file '{}'".format(args.input)
         sys.exit(1)
@@ -167,9 +171,11 @@ def main():
         sys.exit(1)
 
     if response.data['api-server-version'] >= 1.3:
-        print "--- Login to management via API {} complete. (session-uid: {})".format(response.data['api-server-version'],response.data['sid'])
+        print "--- Login to management via API {} complete. (session-uid: {})".format(
+            response.data['api-server-version'], response.data['sid'])
     else:
-        print "!!! Server API needs to be version 1.3 or greater '{}' returned from login.".format(response.data['api-server-version'])
+        print "!!! Server API needs to be version 1.3 or greater '{}' returned from login.".format(
+            response.data['api-server-version'])
         sys.exit(1)
 
     wcm = WildcardManager(client)
