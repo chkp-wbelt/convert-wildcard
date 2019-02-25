@@ -11,9 +11,52 @@ class WildcardManager():
         self.client = client
 
     def cleanup(self, records):
-        #TODO: logic for conversion
-        pass
+        #Loop through records to verify that objects exist for cleanup
+        if len(records) > 0:
+            print '--- Found {:,} records for cleanup' .format(len(records))
+            #Create variable to track number of cleaned up objects
+            track = 0 
+            
+            suffix = {}
+            suffix["R77"] = "_R77"
+            suffix["R80"] = "_R80"
 
+            for records in records:
+                track += 1
+                #Append R77 suffix to ensure it matches the new object name
+                r77name = records['name'] + suffix["R77"]
+                #Append R80 suffix to ensure it matches the wildcard object name
+                r80name = records['name'] + suffix["R80"]
+                #Get UID for R77 network object
+                NUID = self.getNetworkUID(r77name)
+                #Get UID for R80 wildcard objext
+                WUID = self.getWildcardUID(r80name)
+
+                #Delete network object with R77 name 
+                if NUID:
+                    print '    > Found R77 network object "{}" (uid: {})' .format(r77name, NUID)
+                    params = {}
+                    params["uid"] = NUID
+                    #API call to delete the network object with UID paramater 
+                    response = self.client.api_call("delete-network", params)
+                    if response.success:
+                        print '    >  Deleted R77 network object "{}" (uid: {})' .format(r77name, NUID)
+                    else:
+                        print '    >  Failed to delete network object "{}" (Message: {})'.format(r77name, response.error_message)
+                    
+                    #If R80 wildcard object exists, rename it to match original network object name without R80 suffix
+                    if WUID:
+                        print '    >  Found R80 wildcard object "{}" (uid: {})' .format(r80name, WUID)
+                        params = {}
+                        params["uid"] = WUID
+                        params["new-name"] = records['name']
+                        #API call to set wildcard object name to original record name to match previous name used in R77.30 
+                        response = self.client.api_call("set-wildcard", params)
+                        if response.success:
+                            print '    >  Renamed R80 wildcard object "{}" (uid: {})' .format(r80name, WUID)
+                        else:
+                             print '   > Failed to rename R80 wildcard object "{}" (Message: {})'.format(r80name, response.error_message)
+                                
     def convert(self, records):
         #Loop through each record.  Rename existing objects and replace references with new object
         if len(records) > 0:
@@ -129,6 +172,8 @@ def main():
     optional.add_argument("-p", "--password", action="store", help="Password to access the API")
     optional.add_argument("-d", "--domain", action="store", help="Domain (when using multidomain)")
     #TODO: add argument for cleanup
+    optional.add_argument("-c", "--convert", action="store", help="Convert R77.30 network objects to R80 wildcard objects.")
+    optional.add_argument("-r", "--remove", action="store", help="Remove the R77.30 network either after conversion or in a seperate run of the script.")
     args = parser.parse_args()
     
     if os.path.isfile(args.input):
@@ -177,8 +222,23 @@ def main():
     wcm = WildcardManager(client)
     print "--- Starting Convert..."
     #TODO: Logic for convert vs. cleanup?
-    wcm.convert(records)
-    #TODO: wcm.cleanup(records)
+
+    if args.convert and args.cleanup:
+        wcm.convert(records)
+        print "--- Starting Publish..."
+        response = wcm.publish()
+        if response.success:
+            print "-- Publish and conversion succeeded. Proceeding with cleanup of old objects"
+            wcm.cleanup(records)
+        else:
+            print "--- Publish failed. (message: {})".format(response.error_message)
+    elif args.convert:
+        wcm.convert(records)
+    elif args.cleanup:
+        wcm.cleanup(records)
+    else:
+        print "--- ERROR: Neither conversion nor cleanup were selected.  Please rerun the script with either --cleanup or --convert set. "
+    
     print "--- Starting Publish..."
     response = wcm.publish()
     if response.success:
