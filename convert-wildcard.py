@@ -5,7 +5,7 @@ import getpass
 import os.path
 import sys
 
-from cp_mgmt_api_python_sdk.lib import APIClient, APIClientArgs
+from cp_mgmt_api_python_sdk.cpapi import APIClient, APIClientArgs
 
 __version__ = "2.0"
 
