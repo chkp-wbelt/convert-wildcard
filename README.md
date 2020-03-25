@@ -48,9 +48,9 @@ optional arguments:
 ## Examples
 * Minimal
   ```bash
-  convert-wildcard.py -i output.csv -s https://mgmt1.example.com/
+  convert-wildcard.py -i output.csv -s mgmt1.example.com
   ```
 * Complete
   ```bash
-  convert-wildcard.py --input output.csv --server https://mgmt1.example.com/ --user apiuser --password apipw --domain "My Domain"
+  convert-wildcard.py --input output.csv --server mgmt1.example.com --user apiuser --password apipw --domain "My Domain"
   ```
