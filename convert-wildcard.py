@@ -59,9 +59,14 @@ class WildcardManager():
                             params["ipv4-mask-wildcard"] = record["ipv4-mask-wildcard"]
                             params["color"] = record["color"]
                             response = self._client.api_call("add-wildcard", params)
-                            if "uid" in response.data:
-                                WUID = response.data["uid"]
-                                print '    > Created new wildcard object "{}" (uid: {})'.format(r80name, WUID)
+                            if response.success:
+                                if 'uid' in response.data:
+                                    WUID = response.data["uid"]
+                                    print '    > Created new wildcard object "{}" (uid: {})'.format(r80name, WUID)
+                                else:
+                                    print '    > ERROR "No UID returned!" after creating new wildcard object "{}"'.format(r80name)
+                            else:
+                                print '    > ERROR "{}" creating new wildcard object "{}"'.format(response.error_message, r80name)                         
                         response = self._client.api_call("where-used", {'uid': '{}'.format(NUID)})
                         for rule in response.data["used-directly"]["access-control-rules"]:
                             params = {}
@@ -93,8 +98,11 @@ class WildcardManager():
                                     description = "source column"
                                 else:
                                     description = "destination column"
-                                self._client.api_call('set-access-rule', params)
-                                print '      > Updated {}'.format(description)
+                                response = self._client.api_call('set-access-rule', params)
+                                if response.success:
+                                     print '      > Updated {}'.format(description)                              
+                                else:
+                                    print '      > ERROR "{}" updating {}'.format(response.error_message, description)
 
     def publish(self):
         response = self._client.api_call('publish', {}, wait_for_task=True)
