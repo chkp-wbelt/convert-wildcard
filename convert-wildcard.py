@@ -100,7 +100,7 @@ class WildcardManager():
                                     description = "destination column"
                                 response = self._client.api_call('set-access-rule', params)
                                 if response.success:
-                                     print '      > Updated {}'.format(description)                              
+                                    print '      > Updated {}'.format(description)                              
                                 else:
                                     print '      > ERROR "{}" updating {}'.format(response.error_message, description)
 
