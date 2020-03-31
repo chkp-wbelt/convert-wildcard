@@ -14,6 +14,7 @@ Check Point management API script to migrate R77.30 wildcard objects to R80.20 c
   * Rename old R77 network object to a temporary name
   * Create R80.20 version wildcard objects from [Wildcard object CSV](#wildcard-object-csv) information
   * Replace references in rulebase to old R77 network object with new [R80.20 wildcard object](https://sc1.checkpoint.com/documents/latest/APIs/index.html#web/show-wildcard~v1.3)
+  * Requires the [Check Point API SDK](https://github.com/CheckPointSW/cp_mgmt_api_python_sdk/tree/7508cd064ed8737cfc1a7ece55cd817617ff5953) be downloaded and configured correctly
 
 ## Wildcard object CSV
 * First row of the file is a header row for the following columns:
@@ -28,6 +29,19 @@ Check Point management API script to migrate R77.30 wildcard objects to R80.20 c
   name,color,comments,ipv4-address,ipv4-mask-wildcard
   Example_VOICE_Server,orange,"Voice Server",10.0.2.11,0.63.248.0
   ```
+
+##Script Setup
+1. ssh into R80.20 management server
+1. enter expert mode
+1. copy file [convert-wildcard.py](https://raw.githubusercontent.com/chkp-wbelt/convert-wildcard/master/convert-wildcard.py) to /home/admin on R80.20 management server
+	```bash
+	curl_cli -k https://raw.githubusercontent.com/chkp-wbelt/convert-wildcard/master/convert-wildcard.py > /home/admin/convert-wildcard.py
+	```
+1. chmod the script to be executable
+	```bash
+	chmod u+x /home/admin/convert-wildcard.py
+	```
+
 ## Usage
 ```
 usage: convert-wildcard.py [-h] -i INPUT -s SERVER [-u USER] [-p PASSWORD] [-d DOMAIN]
@@ -44,13 +58,20 @@ optional arguments:
                         Password to access the API
   -d DOMAIN, --domain DOMAIN
                         Domain (when using multidomain)
+                        Global - the literal domain name for where global objects are stored (then reassign the global policy)
 ```
 ## Examples
 * Minimal
   ```bash
   convert-wildcard.py -i output.csv -s mgmt1.example.com
   ```
+  ```
+  convert-wildcard.py -i output.csv -s 192.168.10.10
+  ```
 * Complete
   ```bash
   convert-wildcard.py --input output.csv --server mgmt1.example.com --user apiuser --password apipw --domain "My Domain"
+  ```
+  ```bash
+  convert-wildcard.py --input output.csv --server 192.168.10.10 --user apiuser --password apipw --domain "My Domain"
   ```
