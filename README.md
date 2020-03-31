@@ -30,7 +30,7 @@ Check Point management API script to migrate R77.30 wildcard objects to R80.20 c
   Example_VOICE_Server,orange,"Voice Server",10.0.2.11,0.63.248.0
   ```
 
-##Script Setup
+## Script Setup
 1. ssh into R80.20 management server
 1. enter expert mode
 1. copy file [convert-wildcard.py](https://raw.githubusercontent.com/chkp-wbelt/convert-wildcard/master/convert-wildcard.py) to /home/admin on R80.20 management server
